@@ -11,26 +11,27 @@ module S41C
       @host, @port = host, port
       @logger = log_file ? ::STDOUT.reopen(log_file, 'a') : ::STDOUT
       @ole_object = 'V77.Application'
-
-      ["INT", "TERM"].each do |signal|
-        Kernel::trap(signal) {
-        log "\n*** Exiting"
-        exit
-        }
-      end
     end # initialize
 
-    def ole_object(name)
+    def ole_object=(name)
       @ole_object = name
     end # ole_object
 
     def at_exit(&block)
-      Kernel::at_exit do
+      ::Kernel::at_exit do
         yield
       end
     end # at_exit
 
     def start
+
+      ["INT", "TERM"].each do |signal|
+        ::Kernel::trap(signal) {
+        log "\n*** Exiting"
+        exit
+        }
+      end
+
       server = TCPServer.open(@host, @port)
 
       log "*** Server has been started on #{@host}:#{@port}"
@@ -67,6 +68,10 @@ module S41C
             session.puts "Goodbye"
             session.close
           break
+          when "shutdown"
+            session.puts "Server is going down now"
+            session.close
+	    exit
           else
             session.puts "Bad command"
             session.puts "+OK"

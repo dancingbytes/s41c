@@ -12,10 +12,8 @@ Gem::Specification.new do |s|
   s.description = %q{TCP-socket сервер и клиент для 1С:Предприятие}
 
   s.rubyforge_project = "s41c"
-
-  s.files         = `git ls-files`.split("\n")
-  s.test_files    = `git ls-files -- {test,spec,features}/*`.split("\n")
-  s.executables   = `git ls-files -- bin/*`.split("\n").map{ |f| File.basename(f) }
+  
+  s.files      = Dir['**/*']
   s.require_paths = ["lib"]
 
 end
