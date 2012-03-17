@@ -9,7 +9,7 @@ Gem::Specification.new do |s|
   s.email       = ["up.redfield@gmail.com"]
   s.homepage    = "https://github.com/dancingbytes/s41c"
   s.summary     = %q{}
-  s.description = %q{TCP-socket сервер и клиент для 1С:Предприятие}
+  s.description = %q{TCP-socket сервер и клиент для платформы "1С:Предприятие"}
 
   s.rubyforge_project = "s41c"
   
