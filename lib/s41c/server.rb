@@ -49,20 +49,20 @@ module S41C
         session.print "Welcome\r\n"
 
         loop {
-          attrs = S41C::Utils.to_utf8(session.gets || '').chomp.split('|')
-          cmd = attrs.shift
+          args = S41C::Utils.to_utf8(session.gets || '').chomp.split('|')
+          cmd = args.shift
           case cmd
           when "connect"
-            session.puts S41C::Utils.to_bin(connect_to_1c(attrs))
+            session.puts S41C::Utils.to_bin(connect_to_1c(args))
             session.puts "+OK"
           when "create"
-            session.puts S41C::Utils.to_bin(create(attrs))
+            session.puts S41C::Utils.to_bin(create(args))
             session.puts "+OK"
           when "eval_expr"
-            session.puts S41C::Utils.to_bin(eval_expr(attrs))
+            session.puts S41C::Utils.to_bin(eval_expr(args))
             session.puts "+OK"
           when "invoke"
-            session.puts S41C::Utils.to_bin(invoke(attrs))
+            session.puts S41C::Utils.to_bin(invoke(args))
             session.puts "+OK"
           when "disconnect"
             session.puts "Goodbye"
@@ -88,9 +88,9 @@ module S41C
       @logger.flush
     end # log
 
-    def connect_to_1c(attrs)
+    def connect_to_1c(args)
       @conn.ole_free unless @conn.nil?
-      options = attrs.shift || ''
+      options = args.shift || ''
       begin
         @conn = ::WIN32OLE.new('V77.Application') 
         res = @conn.Initialize(
@@ -105,9 +105,9 @@ module S41C
       end
     end
 
-    def create(attrs)
+    def create(args)
       return "Error: not connected" unless @conn
-      obj_name = attrs.shift || ''
+      obj_name = args.shift || ''
       begin
         @obj = @conn.CreateObject(obj_name)
         "Created"
@@ -116,9 +116,9 @@ module S41C
       end
     end
 
-    def eval_expr(attrs)
+    def eval_expr(args)
       return "Error: not connected" unless @conn
-      expr = attrs.shift || ''
+      expr = args.shift || ''
       begin
         @conn.invoke("EvalExpr", expr).to_s
       rescue => e
@@ -126,10 +126,10 @@ module S41C
       end
     end
 
-    def invoke(attrs)
+    def invoke(args)
       return "Error: working object not found. You must create it before" unless @conn
       begin
-        @obj.invoke(*attrs).to_s.encode("UTF-8", "IBM866", :invalid => :replace, :replace => "?")
+        @obj.invoke(*args).to_s.encode("UTF-8", "IBM866", :invalid => :replace, :replace => "?")
       rescue => e
         "Error: #{e.message}"
       end
