@@ -6,7 +6,6 @@ module S41C
 
     def initialize(host='localhost', port=1421, log_file=nil)
       require 'win32ole'
-      require 'socket'
 
       @host, @port = host, port
       @logger = log_file ? ::STDOUT.reopen(log_file, 'a') : ::STDOUT
@@ -45,8 +44,6 @@ module S41C
           IO.select([server])
           retry
         end
-
-        session.print "Welcome\r\n"
 
         loop {
           args = S41C::Utils.to_utf8(session.gets || '').chomp.split('|')
