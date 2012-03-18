@@ -2,12 +2,12 @@
 
 module S41C
 
-  require 'win32ole'
-  require 'socket'
-
   class Server
 
     def initialize(host='localhost', port=1421, log_file=nil)
+      require 'win32ole'
+      require 'socket'
+
       @host, @port = host, port
       @logger = log_file ? ::STDOUT.reopen(log_file, 'a') : ::STDOUT
       @ole_object = 'V77.Application'
