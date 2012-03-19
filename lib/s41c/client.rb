@@ -11,14 +11,12 @@ module S41C
       @prompt = /^\+OK/n
       @errors = []
 
-      begin
-        @client = Net::Telnet.new('Host' => @host, 'Port' => @port, "Prompt" => @prompt)
-        true
-      rescue Errno::ECONNREFUSED => e
-        @errors << e.message
-        false
-      end
     end # initialize
+
+    def login(username, password = nil)
+      @login = username.nil? || username.empty? ? nil : username
+      @password = password
+    end # login
 
     def errors
       @errors
@@ -28,6 +26,10 @@ module S41C
       cmd "connect|#{options}"
     end # connect
 
+    def ping
+      cmd "ping"
+    end # ping
+
     def eval_expr(expr)
       cmd "eval_expr|#{expr}"
     end # eval_expr
@@ -36,7 +38,6 @@ module S41C
       cmd "create|#{obj_name}"
     end # create
 
-    # invoke('НайтиПоНаименованию', 'Шляпа с полями')
     def invoke(method_name, *args)
       cmd "invoke|#{method_name}|#{args.join('|')}"
     end # invoke
@@ -51,8 +52,32 @@ module S41C
 
     private
 
+    def conn
+      return true if @client
+      begin
+
+        @client = Net::Telnet.new('Host' => @host, 'Port' => @port, "Prompt" => @prompt)
+
+        if @login
+          resp = @client.login(@login, @password)
+
+          unless resp["success"]
+            @errors << "Invalid login or password"
+            return false
+          end # unless
+        end # if
+
+        return true
+
+      rescue Errno::ECONNREFUSED => e
+        @errors << e.message
+        return false
+      end
+    end # conn
+
     def cmd(str)
-      parse @client.cmd(S41C::Utils.to_bin(cmd))
+      return @errors unless conn
+      parse @client.cmd(S41C::Utils.to_bin(str))
     end # cmd
 
     def parse(response)
