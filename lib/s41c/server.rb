@@ -138,7 +138,7 @@ module S41C
         end
 
         loop {
-          args = S41C::Utils.to_utf8(session.gets || '').chomp.split('|')
+          args = S41C::Utils.to_utf8(session.gets || '').chomp.split("\0")
           cmd = args.shift
           case cmd
           when "connect"

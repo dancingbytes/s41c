@@ -23,7 +23,7 @@ module S41C
     end # errors
 
     def connect(options)
-      cmd "connect|#{options}"
+      cmd "connect\0#{options}"
     end # connect
 
     def ping
@@ -31,15 +31,15 @@ module S41C
     end # ping
 
     def eval_expr(expr)
-      cmd "eval_expr|#{expr}"
+      cmd "eval_expr\0#{expr}"
     end # eval_expr
 
     def create(obj_name)
-      cmd "create|#{obj_name}"
+      cmd "create\0#{obj_name}"
     end # create
 
     def invoke(method_name, *args)
-      cmd "invoke|#{method_name}|#{args.join('|')}"
+      cmd "invoke\0#{method_name}\0#{args.join("\0")}"
     end # invoke
 
     def disconnect
