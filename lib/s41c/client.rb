@@ -4,6 +4,8 @@ module S41C
 
   class Client
 
+    include S41C::Utils
+
     def initialize(host='localhost', port=1421)
       require 'net/telnet'
 
@@ -30,18 +32,6 @@ module S41C
       cmd "ping"
     end # ping
 
-    def eval_expr(expr)
-      cmd "eval_expr\0#{expr}"
-    end # eval_expr
-
-    def create(obj_name)
-      cmd "create\0#{obj_name}"
-    end # create
-
-    def invoke(method_name, *args)
-      cmd "invoke\0#{method_name}\0#{args.join("\0")}"
-    end # invoke
-
     def disconnect
       cmd "disconnect"
     end # disconnect
@@ -49,6 +39,10 @@ module S41C
     def shutdown
       cmd "shutdown"
     end # shutdown
+
+    def eval(code)
+      cmd "eval\0\n#{code}\nend_of_code"
+    end
 
     private
 
@@ -77,21 +71,14 @@ module S41C
 
     def cmd(str)
       return @errors unless conn
-      parse @client.cmd(S41C::Utils.to_bin(str))
+      parse @client.cmd(to_bin(str))
     end # cmd
 
     def parse(response)
-      resp = S41C::Utils.to_utf8(response)
-      res = []
-
-      resp.each_line do |line|
-        res << line.chomp unless line[@prompt]
-      end # each_line
-
-      res.count > 1 ? res : res.first
+      resp = to_utf8(response)
+      resp.lines.first.chomp
     end # parse
 
   end # Client
 
 end # S41C
-

@@ -4,22 +4,32 @@ module S41C
 
   class Server
 
+    include S41C::Utils
+
     def initialize(host='localhost', port=1421, log_file=nil)
+      require 'socket'
       require 'win32ole'
 
       @host, @port = host, port
       @logger = log_file ? ::STDOUT.reopen(log_file, 'a') : ::STDOUT
-      @ole_object = 'V77.Application'
+      @ole_name = 'V77.Application'
+
     end # initialize
 
-    def set_login(username, password)
+    def login(username, password)
       @login = username
       @password = password
-    end # login_info
+    end # login
 
-    def ole_object=(name)
-      @ole_object = name
-    end # ole_object
+    def db(database, user=nil, password=nil)
+      @conn_options = "/d #{database}"
+      @conn_options << " /n #{user}" if user
+      @conn_options << " /p #{password}" if password
+    end # db
+
+    def ole_name=(name)
+      @ole_name = name
+    end # ole_name=
 
     def at_exit(&block)
       ::Kernel::at_exit do
@@ -35,6 +45,8 @@ module S41C
         exit
         }
       end
+
+      connect_to_1c
 
       server = TCPServer.open(@host, @port)
 
@@ -53,7 +65,7 @@ module S41C
     private
 
     def read_response(session)
-      S41C::Utils.to_utf8(session.gets || '').chomp
+      to_utf8(session.gets || '').chomp
     end # read_response
 
     def log(msg)
@@ -61,52 +73,27 @@ module S41C
       @logger.flush
     end # log
 
-    def connect_to_1c(args)
-      @conn.ole_free unless @conn.nil?
-      options = args.shift || ''
+    def connect_to_1c
       begin
-        @conn = ::WIN32OLE.new('V77.Application') 
-        res = @conn.Initialize(
-          @conn.RMTrade, 
-          options,
+        @ole = ::WIN32OLE.new(@ole_name)
+        @conn = @ole.Initialize(
+          @ole.RMTrade, 
+          (@conn_options),
           ''
         )
-        "Connected"
+      rescue WIN32OLERuntimeError => e
+        @conn = nil
+        log "*** Error: #{to_utf8(e.message)}"
       rescue => e
-        @conn.ole_free
-        "Error: #{e.message}"
+        log "*** Error: #{e.message} from #{__FILE__}:#{__LINE__}"
       end
     end
 
-    def create(args)
+    def eval_code(code)
       return "Error: not connected" unless @conn
-      obj_name = args.shift || ''
-      begin
-        @obj = @conn.CreateObject(obj_name)
-        "Created"
-      rescue => e
-        "Error: #{e.message}"
-      end
-    end
 
-    def eval_expr(args)
-      return "Error: not connected" unless @conn
-      expr = args.shift || ''
-      begin
-        @conn.invoke("EvalExpr", expr).to_s
-      rescue => e
-        "Error: #{e.message}"
-      end
-    end
-
-    def invoke(args)
-      return "Error: working object not found. You must create it before" unless @conn
-      begin
-        @obj.invoke(*args).to_s.encode("UTF-8", "IBM866", :invalid => :replace, :replace => "?")
-      rescue => e
-        "Error: #{e.message}"
-      end
-    end
+      S41C::Sandbox.new(@ole, code).eval_code
+    end # eval_code
 
     def main_loop(server)
       loop do
@@ -137,21 +124,18 @@ module S41C
           end # if
         end
 
+        @objects = {}
+
         loop {
-          args = S41C::Utils.to_utf8(session.gets || '').chomp.split("\0")
+          args = to_utf8(session.gets || '').chomp.split("\0")
           cmd = args.shift
           case cmd
-          when "connect"
-            session.puts S41C::Utils.to_bin(connect_to_1c(args))
-            session.puts "+OK"
-          when "create"
-            session.puts S41C::Utils.to_bin(create(args))
-            session.puts "+OK"
-          when "eval_expr"
-            session.puts S41C::Utils.to_bin(eval_expr(args))
-            session.puts "+OK"
-          when "invoke"
-            session.puts S41C::Utils.to_bin(invoke(args))
+          when "eval"
+            code = ""
+            while !(part = session.gets)['end_of_code']
+              code << to_utf8(part)
+            end
+            session.puts to_bin(eval_code(code))
             session.puts "+OK"
           when "ping"
             session.puts "pong"
@@ -165,7 +149,7 @@ module S41C
             session.close
             exit
           else
-            session.puts "Bad command"
+            session.puts "Bad command: `#{cmd}`"
             session.puts "+OK"
           end
         }
