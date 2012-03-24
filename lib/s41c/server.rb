@@ -19,22 +19,30 @@ module S41C
     def login(username, password)
       @login = username
       @password = password
+
+      self
     end # login
 
     def db(database, user=nil, password=nil)
       @conn_options = "/d #{database}"
       @conn_options << " /n #{user}" if user
       @conn_options << " /p #{password}" if password
+
+      self
     end # db
 
     def ole_name=(name)
       @ole_name = name
+
+      self
     end # ole_name=
 
     def at_exit(&block)
       ::Kernel::at_exit do
         yield
       end
+
+      self
     end # at_exit
 
     def start
@@ -124,10 +132,8 @@ module S41C
           end # if
         end
 
-        @objects = {}
-
         loop {
-          args = to_utf8(session.gets || '').chomp.split("\0")
+          args = read_response(session).split("\0")
           cmd = args.shift
           case cmd
           when "eval"

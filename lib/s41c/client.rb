@@ -18,6 +18,8 @@ module S41C
     def login(username, password = nil)
       @login = username.nil? || username.empty? ? nil : username
       @password = password
+
+      self
     end # login
 
     def errors
