@@ -26,10 +26,6 @@ module S41C
       @errors
     end # errors
 
-    def connect(options)
-      cmd "connect\0#{options}"
-    end # connect
-
     def ping
       cmd "ping"
     end # ping
