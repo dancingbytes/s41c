@@ -1,12 +1,13 @@
 # encoding: utf-8
 
-module S41C
+module S41C #:nodoc
 
-  class Parser
+  class Parser #:nodoc
 
     BLOCK_BEGINNERS = /module|class|def|begin|do|case|if|unless|{/
     BLOCK_ENDERS = /end|}/
 
+    #:nodoc
     def initialize(block)
       sl = block.source_location
       @file, @start_line = sl.first, (sl.last)
@@ -22,6 +23,7 @@ module S41C
 
     end # new
 
+    #:nodoc
     def parse
       raw = @lines[@start_line..-1]
       depth = 0
@@ -45,8 +47,8 @@ module S41C
       block.last.sub!(/#{BLOCK_ENDERS}.*$/, '')
 
       block.join
-    end # parse
+    end
 
-  end # Parser
+  end
 
-end # S41C
+end

@@ -6,6 +6,11 @@ module S41C
 
     include S41C::Utils
 
+    # Создать инстанс сервера
+    #
+    # @param [ String ] адрес, на котором будет запущен сервер
+    # @param [ Integer ] порт
+    # @param [ String ] лог-файл
     def initialize(host='localhost', port=1421, log_file=nil)
       require 'socket'
       require 'win32ole'
@@ -14,37 +19,53 @@ module S41C
       @logger = log_file ? ::STDOUT.reopen(log_file, 'a') : ::STDOUT
       @ole_name = 'V77.Application'
 
-    end # initialize
+    end
 
+    # Задать данные для авторизации подключающихся клиентов
+    #
+    # @param [ String ] логин
+    # @param [ String ] пароль
     def login(username, password)
       @login = username
       @password = password
 
       self
-    end # login
+    end
 
+    # Параметры подключения к базе 1C
+    #
+    # @params [ String ] база
+    # @params [ String ] имя пользователя
+    # @params [ String ] пароль пользователя
     def db(database, user=nil, password=nil)
       @conn_options = "/d #{database}"
       @conn_options << " /n #{user}" if user
       @conn_options << " /p #{password}" if password
 
       self
-    end # db
+    end
 
+    # Название ole-объекта, который будет использоваться для подключения к 1С
+    #
+    # @param [ String ] название ole-объекта
     def ole_name=(name)
       @ole_name = name
 
       self
-    end # ole_name=
+    end
 
+    # Задать блок кода, который будет выполнен при выключении сервера
+    #
+    # @param [ Proc ] блок кода
     def at_exit(&block)
       ::Kernel::at_exit do
         yield
       end
 
       self
-    end # at_exit
+    end
 
+    # Запустить сервер
     def start
 
       ["INT", "TERM"].each do |signal|
@@ -68,18 +89,18 @@ module S41C
         retry
       end
 
-    end # start
+    end
 
     private
 
     def read_response(session)
       to_utf8(session.gets || '').chomp
-    end # read_response
+    end
 
     def log(msg)
       @logger.puts msg
       @logger.flush
-    end # log
+    end
 
     def connect_to_1c
       begin
@@ -101,7 +122,7 @@ module S41C
       return "Error: not connected" unless @conn
 
       S41C::Sandbox.new(@ole, code).eval_code
-    end # eval_code
+    end
 
     def main_loop(server)
       loop do
@@ -161,8 +182,8 @@ module S41C
         }
 
       end
-    end # main_loop
+    end
 
-  end # Server
+  end
 
-end # S41C
+end

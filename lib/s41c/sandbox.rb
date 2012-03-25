@@ -1,11 +1,12 @@
 # encoding: utf-8
 
-module S41C
+module S41C #:nodoc
 
-  class Sandbox
+  class Sandbox #:nodoc
 
     include S41C::Utils
 
+    #:nodoc
     def initialize(ole, code)
       @ole = ole
       code.untaint
@@ -15,6 +16,7 @@ module S41C
       }
     end
 
+    #:nodoc
     def eval_code
       begin
         @code.call
@@ -29,4 +31,4 @@ module S41C
 
   end
 
-end # S41C
+end

@@ -6,6 +6,10 @@ module S41C
 
     include S41C::Utils
 
+    # Создать инстанс клиента
+    #
+    # @param [ String ] адрес сервера
+    # @param [ Integer ] порт сервера
     def initialize(host='localhost', port=1421)
       require 'net/telnet'
       require 's41c/parser'
@@ -14,36 +18,56 @@ module S41C
       @prompt = /^\+OK/n
       @errors = []
 
-    end # initialize
+    end
 
+    # Задать данные для авторизации
+    #
+    # @param [ String ] логин
+    # @param [ String ] пароль
     def login(username, password = nil)
       @login = username.nil? || username.empty? ? nil : username
       @password = password
 
       self
-    end # login
+    end
 
+    # Возвращает массив ошибок
+    #
+    # @return [ Array ] массив ошибок
     def errors
       @errors
-    end # errors
+    end
 
+    # Проверка соединения с сервером
     def ping
       cmd "ping"
-    end # ping
+    end
 
+    # Отключиться от сервера
     def disconnect
       cmd "disconnect"
-    end # disconnect
+    end
 
+    # Остановить сервер и отключиться от него
     def shutdown
       cmd "shutdown"
-    end # shutdown
+    end
 
+    # Выполнить на сервере блок кода
+    #
+    # @param [ Proc ] блок кода
+    #
+    # @return [ String ] результат выполнения блока
     def request(&block)
       code = S41C::Parser.new(block).parse
       self.eval code
-    end # request
+    end
 
+    # Выполнить на сервере строку
+    #
+    # @param [ String ] строка кода
+    #
+    # @return [ String ] результат выполнения
     def eval(code)
       cmd "eval\0\n#{code}\nend_of_code"
     end
@@ -71,18 +95,18 @@ module S41C
         @errors << e.message
         return false
       end
-    end # conn
+    end
 
     def cmd(str)
       return @errors unless conn
       parse @client.cmd(to_bin(str))
-    end # cmd
+    end
 
     def parse(response)
       resp = to_utf8(response)
       resp.lines.first.chomp
-    end # parse
+    end
 
-  end # Client
+  end
 
-end # S41C
+end
