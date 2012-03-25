@@ -8,6 +8,7 @@ module S41C
 
     def initialize(host='localhost', port=1421)
       require 'net/telnet'
+      require 's41c/parser'
 
       @host, @port = host, port
       @prompt = /^\+OK/n
@@ -37,6 +38,11 @@ module S41C
     def shutdown
       cmd "shutdown"
     end # shutdown
+
+    def request(&block)
+      code = S41C::Parser.new(block).parse
+      self.eval code
+    end # request
 
     def eval(code)
       cmd "eval\0\n#{code}\nend_of_code"
