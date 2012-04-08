@@ -94,7 +94,7 @@ module S41C
     private
 
     def read_response(session)
-      to_utf8(session.gets || '').chomp
+      (session.gets || '').chomp
     end
 
     def log(msg)
@@ -118,10 +118,10 @@ module S41C
       end
     end
 
-    def eval_code(code)
+    def eval_code(dump)
       return "Error: not connected" unless @conn
 
-      S41C::Sandbox.new(@ole, code).eval_code
+      S41C::Sandbox.new(@ole, dump).eval_code
     end
 
     def main_loop(server)
@@ -158,11 +158,11 @@ module S41C
           cmd = args.shift
           case cmd
           when "eval"
-            code = ""
+            dump = ""
             while !(part = session.gets)['end_of_code']
-              code << to_utf8(part)
+              dump << part
             end
-            session.puts to_bin(eval_code(code))
+            session.puts to_bin(eval_code(dump))
             session.puts "+OK"
           when "ping"
             session.puts "pong"

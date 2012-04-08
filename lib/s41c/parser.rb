@@ -27,12 +27,18 @@ module S41C #:nodoc
     def parse
       raw = @lines[@start_line..-1]
       depth = 0
+      code = []
       @finish_line = @start_line
 
       raw.each_with_index do |line, index|
 
-        depth += 1 if line[BLOCK_BEGINNERS]
-        depth -= 1 if line[BLOCK_ENDERS]
+        line.gsub!(/^\r\n/,'')
+        line.gsub!(/\r\n$/,'')
+
+        depth += line.scan(BLOCK_BEGINNERS).count
+        depth -= line.scan(BLOCK_ENDERS).count
+
+        code << line
 
         if depth == 0
           @finish_line = index
@@ -41,12 +47,10 @@ module S41C #:nodoc
 
       end # each
 
-      block = raw[0..@finish_line]
+      code.first.sub!(/^.*#{BLOCK_BEGINNERS}/, '')
+      code.last.sub!(/#{BLOCK_ENDERS}.*$/, '')
 
-      block.first.sub!(/^.*#{BLOCK_BEGINNERS}/, '')
-      block.last.sub!(/#{BLOCK_ENDERS}.*$/, '')
-
-      block.join
+      code.delete_if{|el| el.empty?}.join(';')
     end
 
   end

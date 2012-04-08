@@ -7,12 +7,14 @@ module S41C #:nodoc
     include S41C::Utils
 
     #:nodoc
-    def initialize(ole, code)
+    def initialize(ole, dump)
       @ole = ole
-      code.untaint
+      dump.untaint
+      hsh = Marshal.load(dump)
+      @vars = hsh[:vars]
       @code = proc {
         $SAFE = 3
-        instance_eval code, __FILE__, __LINE__
+        instance_eval hsh[:code], __FILE__, __LINE__
       }
     end
 

@@ -55,12 +55,15 @@ module S41C
 
     # Выполнить на сервере блок кода
     #
+    # @param [ Hash ] переменные, которые будут доступны внутри блока
     # @param [ Proc ] блок кода
     #
     # @return [ String ] результат выполнения блока
-    def request(&block)
+    def request(vars = {}, &block)
       code = S41C::Parser.new(block).parse
-      self.eval code
+      dump = Marshal.dump({vars: vars, code: code})
+
+      self.eval dump
     end
 
     # Выполнить на сервере строку
@@ -99,7 +102,7 @@ module S41C
 
     def cmd(str)
       return @errors unless conn
-      parse @client.cmd(to_bin(str))
+      parse @client.cmd(str)
     end
 
     def parse(response)
