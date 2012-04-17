@@ -10,7 +10,7 @@ module S41C #:nodoc
     def initialize(ole, dump)
       @ole = ole
       dump.untaint
-      hsh = Marshal.load(dump)
+      hsh = Marshal.load(dump.unpack('m')[0])
       @vars = hsh[:vars]
       @code = proc {
         $SAFE = 3
@@ -25,7 +25,7 @@ module S41C #:nodoc
       rescue WIN32OLERuntimeError => e
         "Error: #{to_utf8(e.message)}"
       rescue Exception => e
-        "Error: #{e.message}"
+        "Error Exception: #{e.message}"
       rescue => e
         "Error: #{e.message} from #{__FILE__}:#{__LINE__}"
       end

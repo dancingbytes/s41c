@@ -4,8 +4,8 @@ module S41C #:nodoc
 
   class Parser #:nodoc
 
-    BLOCK_BEGINNERS = /module|class|def|begin|do|case|if|unless|{/
-    BLOCK_ENDERS = /end|}/
+    BLOCK_BEGINNERS = /\b(module|class|def|begin|do|case|if|unless)\b|{/
+    BLOCK_ENDERS = /\bend\b|}/
 
     #:nodoc
     def initialize(block)
@@ -28,7 +28,6 @@ module S41C #:nodoc
       raw = @lines[@start_line..-1]
       depth = 0
       code = []
-      @finish_line = @start_line
 
       raw.each_with_index do |line, index|
 
@@ -40,10 +39,7 @@ module S41C #:nodoc
 
         code << line
 
-        if depth == 0
-          @finish_line = index
-          break
-        end #if
+        break if depth == 0
 
       end # each
 

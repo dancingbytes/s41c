@@ -63,7 +63,7 @@ module S41C
       code = S41C::Parser.new(block).parse
       dump = Marshal.dump({vars: vars, code: code})
 
-      self.eval dump
+      self.eval [dump].pack('m')
     end
 
     # Выполнить на сервере строку
