@@ -58,7 +58,7 @@ TCP-socket-сервер и клиент для платформы "1С:Пред�
     client = S41C::Client.new('127.0.0.1', 2000)
     client.login('username', 'password')
 
-    vars = {:spr_name => 'Товары', tov_name => 'Название товара'}
+    vars = {:spr_name => 'Товары', :tov_name => 'Название товара'}
     response = client.request(vars) do
 
       spr = @ole.CreateObject("Справочник.#{@vars[:spr_name]}")
