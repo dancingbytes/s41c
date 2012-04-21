@@ -11,7 +11,12 @@ module S41C #:nodoc
       @ole = ole
       dump.untaint
       hsh = Marshal.load(dump.unpack('m')[0])
+
       @vars = hsh[:vars]
+      @vars.each do |key, value|
+        self.instance_variable_set(:"@#{key}", value)
+      end
+
       @code = proc {
         $SAFE = 3
         instance_eval hsh[:code], __FILE__, __LINE__
