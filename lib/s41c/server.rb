@@ -119,7 +119,7 @@ module S41C
     end
 
     def eval_code(dump)
-      return "Error: not connected" unless @conn
+      return "Error: not connected to 1C" unless @conn
 
       S41C::Sandbox.new(@ole, dump).eval_code
     end

@@ -35,7 +35,7 @@ module S41C
     def get_1c_id(obj)
       return false unless @ole
 
-      str_id = @ole.invoke('ЗначениеВСтрокуВнутр', obj)
+      str_id = to_utf8 @ole.invoke('ЗначениеВСтрокуВнутр', obj)
       escaped_str_id = "\"#{str_id.gsub('"', '""')}\""
 
     end
