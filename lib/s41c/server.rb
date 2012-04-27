@@ -11,7 +11,7 @@ module S41C
     # @param [ String ] адрес, на котором будет запущен сервер
     # @param [ Integer ] порт
     # @param [ String ] лог-файл
-    def initialize(host='localhost', port=1421, log_file=nil)
+    def initialize(host='0.0.0.0', port=1421, log_file=nil)
       require 'socket'
       require 'win32ole'
 
@@ -30,6 +30,10 @@ module S41C
       @password = password
 
       self
+    end
+
+    def white_list(*args)
+      @white_list = args
     end
 
     # Параметры подключения к базе 1C
@@ -108,7 +112,7 @@ module S41C
         @conn = @ole.Initialize(
           @ole.RMTrade, 
           (@conn_options),
-          ''
+          'NO_SPLASH_SHOW'
         )
       rescue WIN32OLERuntimeError => e
         @conn = nil
@@ -132,6 +136,11 @@ module S41C
         rescue IO::WaitReadable, Errno::EINTR
           IO.select([server])
           retry
+        end
+
+        if @white_list && !@white_list.include?(session.remote_address.ip_address)
+          session.close
+          next
         end
 
         if @login
