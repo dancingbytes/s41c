@@ -32,6 +32,9 @@ module S41C
       self
     end
 
+    # Задать IP-адреса, с которых разрешено подключение
+    #
+    # @param [ Array ] список адресов
     def white_list(*args)
       @white_list = args
     end
