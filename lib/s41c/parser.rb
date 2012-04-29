@@ -4,7 +4,7 @@ module S41C #:nodoc
 
   class Parser #:nodoc
 
-    BLOCK_BEGINNERS = /\b(module|class|def|begin|do|case|if|unless)\b|{/
+    BLOCK_BEGINNERS = /\b(module|class|def|begin|do|case|if|unless|while|until)\b|{/
     BLOCK_ENDERS = /\bend\b|}/
 
     #:nodoc

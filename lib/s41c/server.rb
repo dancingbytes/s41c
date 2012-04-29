@@ -19,6 +19,8 @@ module S41C
       @logger = log_file ? ::STDOUT.reopen(log_file, 'a') : ::STDOUT
       @ole_name = 'V77.Application'
 
+      @local_storage = {}
+
     end
 
     # Задать данные для авторизации подключающихся клиентов
@@ -128,7 +130,7 @@ module S41C
     def eval_code(dump)
       return "Error: not connected to 1C" unless @conn
 
-      S41C::Sandbox.new(@ole, dump).eval_code
+      S41C::Sandbox.new(@ole, @local_storage, dump).eval_code
     end
 
     def main_loop(server)

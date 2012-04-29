@@ -7,8 +7,10 @@ module S41C #:nodoc
     include S41C::Utils
 
     #:nodoc
-    def initialize(ole, dump)
+    def initialize(ole, local_storage, dump)
       @ole = ole
+      @local_storage = local_storage
+
       dump.untaint
       hsh = Marshal.load(dump.unpack('m')[0])
 
