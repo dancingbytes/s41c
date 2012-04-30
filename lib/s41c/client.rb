@@ -9,12 +9,13 @@ module S41C
     # Создать инстанс клиента
     #
     # @param [ String ] адрес сервера
-    # @param [ Integer ] порт сервера
-    def initialize(host='localhost', port=1421)
+    # @param [ Integer ] порт сервера (по умолчанию 1421)
+    # @param [ Integer ] таймаут (по умолчанию 30 секунд)
+    def initialize(host='localhost', port=1421, timeout=30)
       require 'net/telnet'
       require 's41c/parser'
 
-      @host, @port = host, port
+      @host, @port, @timeout = host, port, timeout
       @prompt = /^\+OK/n
       @errors = []
 
@@ -81,7 +82,11 @@ module S41C
       return true if @client
       begin
 
-        @client = Net::Telnet.new('Host' => @host, 'Port' => @port, "Prompt" => @prompt)
+        @client = Net::Telnet.new('Host' => @host,
+                    'Port' => @port,
+                    'Prompt' => @prompt,
+                    'Timeout' => @timeout
+                   )
 
         if @login
           resp = @client.login(@login, @password)
